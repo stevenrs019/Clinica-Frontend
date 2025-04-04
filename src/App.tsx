@@ -10,6 +10,7 @@ import ContactQuickActions from './components/ContactQuickActions';
 import Specialties from './components/Specialties';
 import Footer from './components/Footer';
 import PatientDashboard from './components/Dashboard/PatientDashboard';
+import ScheduleAppointment from './components/ScheduleAppointment';
 import PrivateRoute from './components/PrivateRoute';
 
 
@@ -31,6 +32,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/agendar-cita" element={<ScheduleAppointment />} />
         <Route
           path="/dashboard/paciente"
           element={
