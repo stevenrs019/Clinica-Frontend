@@ -10,8 +10,11 @@ import ContactQuickActions from './components/ContactQuickActions';
 import Specialties from './components/Specialties';
 import Footer from './components/Footer';
 import PatientDashboard from './components/Dashboard/PatientDashboard';
+import DoctorDashboard from './components/Dashboard/DoctorDashboard';
 import ScheduleAppointment from './components/ScheduleAppointment';
 import PrivateRoute from './components/PrivateRoute';
+import ContactSection from './components/ContactSection';
+import GetAppointment from './components/GetAppointment';
 
 
 function App() {
@@ -24,6 +27,7 @@ function App() {
       <Hero />
       <ContactQuickActions />
       <Specialties />
+      <ContactSection/>
       <Footer />
     </>
   );
@@ -32,12 +36,33 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/agendar-cita" element={<ScheduleAppointment />} />
+        <Route path="/agendar-cita"
+         element={
+          <PrivateRoute>
+            <ScheduleAppointment />
+          </PrivateRoute>
+        } />
         <Route
           path="/dashboard/paciente"
           element={
             <PrivateRoute>
               <PatientDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/dashboard/doctor"
+          element={
+            <PrivateRoute>
+              <DoctorDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/obtener-citas"
+          element={
+            <PrivateRoute>
+              <GetAppointment />
             </PrivateRoute>
           }
         />

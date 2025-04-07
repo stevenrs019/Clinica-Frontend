@@ -24,19 +24,38 @@ const LoginModal: React.FC<Props> = ({ isOpen, onClose, onSwitchToRegister }) =>
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, contrasena }),
             });
-
+    
             const result = await response.json();
             console.log(result);
-
+    
             if (result.code === 0) {
+                const user = result.content;
+                localStorage.setItem("usuario", JSON.stringify(user));
+                onClose();
+    
                 Swal.fire({
                     icon: 'success',
                     title: 'Inicio de sesión exitoso',
                     text: '¡Bienvenido a MediLink!',
+                    timer: 1500,
+                    showConfirmButton: false
                 });
-                localStorage.setItem("usuario", JSON.stringify(result.content));
-                onClose();
-                navigate('/dashboard/paciente');
+                console.log(user.ID_ROL)
+                // Redirección según el rol
+                if (user.iD_ROL === 2) {
+                    navigate('/dashboard/paciente');
+                } else if (user.iD_ROL === 3) {
+                    navigate('/dashboard/doctor');
+                } else if (user.iD_ROL === 1) {
+                    navigate('/dashboard/admin');
+                } else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Rol desconocido',
+                        text: 'Este rol no tiene acceso configurado.',
+                    });
+                }
+    
             } else {
                 Swal.fire({
                     icon: 'error',
@@ -52,6 +71,7 @@ const LoginModal: React.FC<Props> = ({ isOpen, onClose, onSwitchToRegister }) =>
             });
         }
     };
+    
 
     return (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">

@@ -1,41 +1,46 @@
-// src/components/PatientDashboard.tsx
+// src/components/Dashboard/DoctorDashboard.tsx
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import HeaderPacient from '../HeaderPacient';
 
-const PatientDashboard = () => {
+const DoctorDashboard = () => {
     const navigate = useNavigate();
 
-    const handleLogout = () => {
-        localStorage.removeItem('usuario'); // Limpiar datos
-        navigate('/'); // Redirigir a landing
-    };
+    useEffect(() => {
+        const user = localStorage.getItem("usuario");
+        if (!user) {
+            navigate("/"); // si no está logueado
+            return;
+        }
+
+    }, [navigate]);
 
     const options = [
         {
-            label: 'Agendar cita',
-            icon: '📅', // o usás un ícono SVG o imagen
-            action: () => navigate('/agendar-cita')
+            label: 'Consultas',
+            icon: '🩺',
+            action: () => navigate('/obtener-citas')
         },
         {
             label: 'Ver historial',
             icon: '📋',
-            action: () => navigate('/historial')
+            action: () => navigate('/medico/historial')
         },
         {
             label: 'Telemedicina',
             icon: '📡',
-            action: () => navigate('/telemedicina')
+            action: () => navigate('/medico/telemedicina')
         },
         {
             label: 'Perfil',
             icon: '👤',
-            action: () => navigate('/perfil')
+            action: () => navigate('/medico/perfil')
         }
     ];
 
     return (
         <div className="min-h-screen bg-gray-100">
-            <HeaderPacient/>
+            <HeaderPacient /> {/* Cambiá si usás HeaderDoctor */}
 
             <main className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-4xl mx-auto py-16 px-4">
                 {options.map((option, idx) => (
@@ -53,4 +58,4 @@ const PatientDashboard = () => {
     );
 };
 
-export default PatientDashboard;
+export default DoctorDashboard;
