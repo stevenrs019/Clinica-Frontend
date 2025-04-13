@@ -5,10 +5,7 @@ import HeaderPacient from '../HeaderPacient';
 const PatientDashboard = () => {
     const navigate = useNavigate();
 
-    const handleLogout = () => {
-        localStorage.removeItem('usuario'); // Limpiar datos
-        navigate('/'); // Redirigir a landing
-    };
+    
 
     const options = [
         {

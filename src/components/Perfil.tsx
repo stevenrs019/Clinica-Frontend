@@ -1,5 +1,5 @@
 // src/components/Perfil.tsx
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import HeaderPacient from './HeaderPacient'; 
 import { useNavigate } from 'react-router-dom';

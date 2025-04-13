@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import HeaderPacient from './HeaderPacient';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';

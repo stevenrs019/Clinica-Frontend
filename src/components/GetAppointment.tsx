@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import HeaderPacient from './HeaderPacient';
@@ -10,7 +10,7 @@ import AppointmentModal from './AppointmentModal';
 interface Cita {
     iD_CITA: number;
     nombrE_PACIENTE: string;
-    email_PACIENTE: string;
+    emaiL_PACIENTE: string;
     horA_INICIO: string;
     horA_FIN: string;
     estado: string;
@@ -20,7 +20,7 @@ interface Cita {
 const GetAppointment = () => {
     const [fecha, setFecha] = useState<Date | null>(null);
     const [citas, setCitas] = useState<Cita[]>([]);
-    const [cargando, setCargando] = useState(false);
+    const [cargando] = useState(false);
     const navigate = useNavigate();
     const [citaSeleccionada, setCitaSeleccionada] = useState<Cita | null>(null);
 
@@ -102,6 +102,9 @@ const GetAppointment = () => {
                                     <h3 className="text-lg font-semibold text-gray-700">{cita.nombrE_PACIENTE}</h3>
                                     <p className="text-sm text-gray-600">
                                         ⏰ {cita.horA_INICIO} - {cita.horA_FIN}
+                                    </p>
+                                    <p className="text-sm text-gray-600">
+                                        {cita.tipO_CITA}
                                     </p>
                                     <p className="text-sm text-gray-600">
                                         {cita.tipO_CITA}
