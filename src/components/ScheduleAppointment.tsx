@@ -34,6 +34,7 @@ const ScheduleAppointment = () => {
 
   const [cargandoHorarios, setCargandoHorarios] = useState(false);
   const navigate = useNavigate();
+  const [enviando, setEnviando] = useState(false);
 
   useEffect(() => {
     fetch("https://apiclinicasalud.azurewebsites.net/api/especialidad")
@@ -50,16 +51,38 @@ const ScheduleAppointment = () => {
   }, []);
 
   useEffect(() => {
-    // Simulamos lista de médicos
     if (idEspecialidad > 0) {
-      setMedicos([
-        { id: 1, nombre: "Dr. Juan Pérez" },
-        { id: 2, nombre: "Dra. Ana Gómez" },
-      ]);
+      fetch(`https://apiclinicasalud.azurewebsites.net/api/medico/obtener-por-especialidad/${idEspecialidad}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.code === 0 && Array.isArray(data.content)) {
+            const medicosMapeados = data.content.map((m: any) => ({
+              id: m.idMedico,
+              nombre: `${m.nombre} ${m.apellido1} ${m.apellido2}`
+            }));
+            setMedicos(medicosMapeados);
+          } else {
+            setMedicos([]);
+            Swal.fire({
+              icon: 'info',
+              title: 'Sin médicos',
+              text: data.message || 'No hay médicos disponibles para esta especialidad.'
+            });
+          }
+        })
+        .catch(() => {
+          setMedicos([]);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Ocurrió un error al obtener los médicos.'
+          });
+        });
     } else {
       setMedicos([]);
     }
   }, [idEspecialidad]);
+  
 
   const obtenerHorarios = async () => {
     if (idEspecialidad === 0) {
@@ -139,6 +162,8 @@ const ScheduleAppointment = () => {
   };
 
 
+
+
   const agendarCita = async () => {
     if (!idMedico || !fecha || !idHorario) {
       Swal.fire({
@@ -149,7 +174,8 @@ const ScheduleAppointment = () => {
       return;
     }
   
-    const idUsuario = JSON.parse(localStorage.getItem("usuario") || "{}")?.iD_USUARIO || null;
+    const usuario = JSON.parse(localStorage.getItem("usuario") || "{}");
+    const idUsuario = usuario?.iD_USUARIO || null;
   
     if (!idUsuario) {
       Swal.fire({
@@ -168,10 +194,13 @@ const ScheduleAppointment = () => {
       id_MEDICO: idMedico,
       iD_USUARIO: idUsuario,
       id_HORARIO: idHorario,
+      TIPO_CITA: "Presencial",
       dia,
       mes,
       anio
     };
+  
+    setEnviando(true); // ⏳ comienza proceso
   
     try {
       const res = await fetch("https://apiclinicasalud.azurewebsites.net/api/cita/agendar", {
@@ -188,7 +217,11 @@ const ScheduleAppointment = () => {
           title: 'Cita agendada',
           text: result.message,
         });
-        // Reiniciar formulario
+  
+        // Enviar correo después de agendar
+        await enviarCorreoCita();
+  
+        // Resetear formulario
         setIdEspecialidad(0);
         setIdMedico(0);
         setFecha(null);
@@ -207,8 +240,80 @@ const ScheduleAppointment = () => {
         title: 'Error de conexión',
         text: 'Hubo un problema al conectar con el servidor. Intentá de nuevo.',
       });
+    } finally {
+      setEnviando(false); // ✅ finaliza proceso
     }
   };
+  
+
+  const enviarCorreoCita = async () => {
+    const usuario = JSON.parse(localStorage.getItem("usuario") || "{}");
+    const correo = usuario?.email || null;
+  
+    if (!correo || !fecha || !idHorario) return;
+  
+    const fechaStr = `${fecha.getDate().toString().padStart(2, '0')}/${(fecha.getMonth() + 1)
+      .toString().padStart(2, '0')}/${fecha.getFullYear()}`;
+  
+    const horario = horarios.find(h => h.id_HORARIO === idHorario);
+  
+    const mensajePlano = `Hola, te confirmamos que tu cita fue agendada con éxito. Fecha: ${fechaStr} Horario: ${horario?.hora_INICIO} - ${horario?.hora_FIN}. Tipo: Presencial. Gracias por confiar en Clínica Salud Integral.`;
+  
+    const contenidoHtml = `
+      <h2>Confirmación de Cita Médica</h2>
+      <p>Hola, te confirmamos que tu cita fue agendada con éxito.</p>
+      <p><strong>Fecha:</strong> ${fechaStr}</p>
+      <p><strong>Horario:</strong> ${horario?.hora_INICIO} - ${horario?.hora_FIN}</p>
+      <p><strong>Tipo:</strong> Presencial</p>
+      <p>Gracias por confiar en Clínica Salud Integral.</p>
+    `;
+  
+    const emailData = {
+      to: correo,
+      subject: "Confirmación de tu cita médica",
+      htmlContent: contenidoHtml,
+    };
+  
+    try {
+      const response = await fetch("https://apiclinicasalud.azurewebsites.net/api/notificacion/enviar-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(emailData),
+      });
+  
+      const result = await response.json();
+  
+      if (!response.ok) {
+        console.error("Error al enviar correo:", result.message);
+        return;
+      }
+  
+      const historialData = {
+        email: correo,
+        mensaje: mensajePlano,
+        iD_TIPO_NOTIFICACION: 2 //ID para correo de confirmación 
+      };
+  
+      const historialRes = await fetch("https://apiclinicasalud.azurewebsites.net/api/historialnotificacion/insertar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(historialData),
+      });
+  
+      const historialResult = await historialRes.json();
+  
+      if (historialRes.ok) {
+        console.log("Historial registrado correctamente");
+      } else {
+        console.error("Error al registrar historial:", historialResult.message);
+      }
+  
+    } catch (error) {
+      console.error("Fallo el envío del correo o el historial", error);
+    }
+  };
+  
+  
   
 
 
@@ -307,11 +412,23 @@ const ScheduleAppointment = () => {
 
             {idHorario !== 0 && (
               <button
-                onClick={agendarCita}
-                className="w-full bg-green-600 text-white font-semibold py-3 rounded-lg hover:bg-green-700 transition cursor-pointer"
-              >
-                Agendar Cita
-              </button>
+              onClick={agendarCita}
+              disabled={enviando}
+              className={`w-full text-white font-semibold py-3 rounded-lg transition cursor-pointer 
+                ${enviando ? 'bg-gray-400' : 'bg-green-600 hover:bg-green-700'}`}
+            >
+              {enviando ? (
+                <span className="flex justify-center items-center gap-2">
+                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                  </svg>
+                  Agendando...
+                </span>
+              ) : (
+                'Agendar Cita'
+              )}
+            </button>
             )}
           </div>
         </div>

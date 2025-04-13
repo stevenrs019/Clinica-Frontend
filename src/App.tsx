@@ -15,6 +15,9 @@ import ScheduleAppointment from './components/ScheduleAppointment';
 import PrivateRoute from './components/PrivateRoute';
 import ContactSection from './components/ContactSection';
 import GetAppointment from './components/GetAppointment';
+import GetHistorialPacient from './components/GetHistorialPacient';
+import GetHistorialForEmail from './components/GetHistorialForEmail';
+import Perfil from './components/Perfil';
 
 
 function App() {
@@ -66,8 +69,33 @@ function App() {
             </PrivateRoute>
           }
         />
-
+        <Route
+          path="/obtener-historial-pacient"
+          element={
+            <PrivateRoute>
+              <GetHistorialPacient />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/obtener-historial-for-email"
+          element={
+            <PrivateRoute>
+              <GetHistorialForEmail />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/perfil"
+          element={
+            <PrivateRoute>
+              <Perfil />
+            </PrivateRoute>
+          }
+        />
       </Routes>
+
+      
 
       {/* Modales visibles desde cualquier ruta */}
       <LoginModal

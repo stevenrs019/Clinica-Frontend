@@ -10,9 +10,11 @@ import AppointmentModal from './AppointmentModal';
 interface Cita {
     iD_CITA: number;
     nombrE_PACIENTE: string;
+    email_PACIENTE: string;
     horA_INICIO: string;
     horA_FIN: string;
     estado: string;
+    tipO_CITA: string;
 }
 
 const GetAppointment = () => {
@@ -101,6 +103,9 @@ const GetAppointment = () => {
                                     <p className="text-sm text-gray-600">
                                         ⏰ {cita.horA_INICIO} - {cita.horA_FIN}
                                     </p>
+                                    <p className="text-sm text-gray-600">
+                                        {cita.tipO_CITA}
+                                    </p>
                                     <p className="text-sm text-[#e80f26] font-medium mt-1">{cita.estado}</p>
                                 </div>
                             ))}
@@ -114,6 +119,7 @@ const GetAppointment = () => {
                 isOpen={!!citaSeleccionada}
                 onClose={() => setCitaSeleccionada(null)}
                 cita={citaSeleccionada}
+                onHistorialGuardado={consultarCitas}
             />
         </>
     );

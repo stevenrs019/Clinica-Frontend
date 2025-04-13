@@ -24,7 +24,7 @@ const DoctorDashboard = () => {
         {
             label: 'Ver historial',
             icon: '📋',
-            action: () => navigate('/medico/historial')
+            action: () => navigate('/obtener-historial-for-email')
         },
         {
             label: 'Telemedicina',
@@ -34,7 +34,7 @@ const DoctorDashboard = () => {
         {
             label: 'Perfil',
             icon: '👤',
-            action: () => navigate('/medico/perfil')
+            action: () => navigate('/perfil')
         }
     ];
 

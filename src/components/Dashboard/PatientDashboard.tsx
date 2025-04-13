@@ -19,7 +19,7 @@ const PatientDashboard = () => {
         {
             label: 'Ver historial',
             icon: '📋',
-            action: () => navigate('/historial')
+            action: () => navigate('/obtener-historial-pacient')
         },
         {
             label: 'Telemedicina',
